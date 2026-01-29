@@ -1,10 +1,12 @@
 from fastapi import FastAPI, HTTPException, Depends
+from fastapi.responses import JSONResponse
 
 from models.schemas import (
     EncryptRequest, 
     DecryptRequest, 
     EncryptResponse, 
-    DecryptResponse
+    DecryptResponse,
+    HealthResponse
 )
 from services.crypto import encrypt_text, decrypt_text
 from middleware import LoggingMiddleware
@@ -24,23 +26,43 @@ logger.info("Encrypt/Decrypt API started successfully!")
 
 @app.get("/")
 def root():
-    return {"message": "Encrypt/Decrypt API", "docs": "/docs"}
-
-@app.get("/health")
-def health_check():
     return {
-        "status": "ok",
-        "timestamp": datetime.now().isoformat()
+        "responseCode": 200,
+        "status": "SUCCESS",
+        "message": "Encrypt/Decrypt API",
+        "docs": "/docs"
     }
+
+
+@app.get("/health", response_model=HealthResponse)
+def health_check():
+    return HealthResponse(
+        responseCode=200,
+        status="SUCCESS",
+        timestamp=datetime.now().isoformat()
+    )
 
 
 @app.post("/encrypt", response_model=EncryptResponse, dependencies=[Depends(verify_signature)])
 def encrypt(request: EncryptRequest):
-    result = encrypt_text(request.text, request.secret_key)
-    return EncryptResponse(
-        encrypted_text=result,
-        message="Text encrypted successfully"
-    )
+    try:
+        result = encrypt_text(request.text, request.secret_key)
+        return EncryptResponse(
+            responseCode=200,
+            status="SUCCESS",
+            encrypted_text=result,
+            message="Text encrypted successfully"
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={
+                "responseCode": 500,
+                "status": "INTERNAL_ERROR",
+                "message": "Failed to encrypt text",
+                "detail": str(e)
+            }
+        )
 
 
 @app.post("/decrypt", response_model=DecryptResponse, dependencies=[Depends(verify_signature)])
@@ -48,13 +70,19 @@ def decrypt(request: DecryptRequest):
     try:
         result = decrypt_text(request.encrypted_text, request.secret_key)
         return DecryptResponse(
+            responseCode=200,
+            status="SUCCESS",
             decrypted_text=result,
             message="Text decrypted successfully"
         )
     except Exception:
-        raise HTTPException(
-            status_code=400, 
-            detail="Invalid encrypted text or wrong secret key"
+        return JSONResponse(
+            status_code=400,
+            content={
+                "responseCode": 400,
+                "status": "BAD_REQUEST",
+                "message": "Invalid encrypted text or wrong secret key",
+                "detail": None
+            }
         )
-
 

@@ -18,16 +18,37 @@ def verify_signature(request: Request):
     signature = request.headers.get("X-Signature")
     
     if not timestamp or not signature:
-        raise HTTPException(status_code=401, detail="Missing authentication headers")
+        raise HTTPException(
+            status_code=401, 
+            detail={
+                "responseCode": 401,
+                "status": "UNAUTHORIZED",
+                "message": "Missing authentication headers"
+            }
+        )
     
     # Cek timestamp expired
     try:
         request_time = int(timestamp)
         current_time = int(time.time())
         if abs(current_time - request_time) > TIME_TOLERANCE:
-            raise HTTPException(status_code=401, detail="Request expired")
+            raise HTTPException(
+                status_code=401, 
+                detail={
+                    "responseCode": 401,
+                    "status": "UNAUTHORIZED",
+                    "message": "Request expired"
+                }
+            )
     except ValueError:
-        raise HTTPException(status_code=401, detail="Invalid timestamp")
+        raise HTTPException(
+            status_code=401, 
+            detail={
+                "responseCode": 401,
+                "status": "UNAUTHORIZED",
+                "message": "Invalid timestamp"
+            }
+        )
     
     # Generate signature dan bandingkan
     expected_signature = hashlib.sha256(
@@ -35,4 +56,11 @@ def verify_signature(request: Request):
     ).hexdigest()
     
     if signature != expected_signature:
-        raise HTTPException(status_code=401, detail="Invalid signature")
+        raise HTTPException(
+            status_code=401, 
+            detail={
+                "responseCode": 401,
+                "status": "UNAUTHORIZED",
+                "message": "Invalid signature"
+            }
+        )
