@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 
 from models.schemas import (
     EncryptRequest, 
@@ -10,6 +10,7 @@ from services.crypto import encrypt_text, decrypt_text
 from middleware import LoggingMiddleware
 from services.logger import logger
 from datetime import datetime
+from middleware.auth_middelware import verify_signature
 
 
 app = FastAPI(title="Encrypt/Decrypt API")
@@ -33,7 +34,7 @@ def health_check():
     }
 
 
-@app.post("/encrypt", response_model=EncryptResponse)
+@app.post("/encrypt", response_model=EncryptResponse, dependencies=[Depends(verify_signature)])
 def encrypt(request: EncryptRequest):
     result = encrypt_text(request.text, request.secret_key)
     return EncryptResponse(
@@ -42,7 +43,7 @@ def encrypt(request: EncryptRequest):
     )
 
 
-@app.post("/decrypt", response_model=DecryptResponse)
+@app.post("/decrypt", response_model=DecryptResponse, dependencies=[Depends(verify_signature)])
 def decrypt(request: DecryptRequest):
     try:
         result = decrypt_text(request.encrypted_text, request.secret_key)
