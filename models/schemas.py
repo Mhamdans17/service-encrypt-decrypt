@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, Field
+from typing import Optional, Dict, Any
 
 
 class BaseResponse(BaseModel):
@@ -9,13 +9,13 @@ class BaseResponse(BaseModel):
 
 
 class EncryptRequest(BaseModel):
-    text: str
-    secret_key: str
+    text: str = Field(..., min_length=1, description="Text to encrypt")
+    secret_key: str = Field(..., min_length=1, description="Secret key for encryption")
 
 
 class DecryptRequest(BaseModel):
-    encrypted_text: str
-    secret_key: str
+    encrypted_text: str = Field(..., min_length=1, description="Encrypted text to decrypt")
+    secret_key: str = Field(..., min_length=1, description="Secret key for decryption")
 
 
 class EncryptResponse(BaseResponse):
@@ -34,4 +34,31 @@ class HealthResponse(BaseModel):
 
 class ErrorResponse(BaseResponse):
     detail: Optional[str] = None
-    
+
+
+# UUID Schemas
+class UUIDResponse(BaseResponse):
+    uuid: str
+    version: str
+
+
+# JWT Schemas
+class JWTEncodeRequest(BaseModel):
+    payload: Dict[str, Any] = Field(..., description="Data payload to encode")
+    secret_key: str = Field(..., min_length=1, description="Secret key for JWT signing")
+    expires_in_minutes: Optional[int] = Field(60, description="Token expiration in minutes")
+
+
+class JWTDecodeRequest(BaseModel):
+    token: str = Field(..., min_length=1, description="JWT token to decode")
+    secret_key: str = Field(..., min_length=1, description="Secret key for JWT verification")
+
+
+class JWTEncodeResponse(BaseResponse):
+    token: Optional[str] = None
+    expires_in_minutes: Optional[int] = None
+
+
+class JWTDecodeResponse(BaseResponse):
+    payload: Optional[Dict[str, Any]] = None
+
