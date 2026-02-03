@@ -1,6 +1,10 @@
 import logging
 import sys
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
+
+# Define WIB timezone (UTC+7)
+WIB = timezone(timedelta(hours=7))
 
 
 # Custom formatter dengan warna dan format profesional
@@ -18,8 +22,8 @@ class ColoredFormatter(logging.Formatter):
         color = self.COLORS.get(record.levelname, self.COLORS['RESET'])
         reset = self.COLORS['RESET']
         
-        # Format timestamp
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+        # Format timestamp dengan WIB timezone
+        timestamp = datetime.now(WIB).strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
         
         # Build formatted message
         formatted_msg = (

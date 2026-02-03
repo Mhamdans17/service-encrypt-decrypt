@@ -19,7 +19,10 @@ from services.crypto import encrypt_text, decrypt_text
 from services.generator import generate_uuid_v4, generate_uuid_v1, encode_jwt, decode_jwt
 from middleware import LoggingMiddleware
 from services.logger import logger
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
+# Define WIB timezone (UTC+7)
+WIB = timezone(timedelta(hours=7))
 from middleware.auth_middelware import verify_signature
 
 
@@ -96,7 +99,7 @@ def health_check():
     return HealthResponse(
         responseCode=200,
         status="SUCCESS",
-        timestamp=datetime.now().isoformat()
+        timestamp=datetime.now(WIB).isoformat()
     )
 
 
