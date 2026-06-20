@@ -19,11 +19,8 @@ from services.crypto import encrypt_text, decrypt_text
 from services.generator import generate_uuid_v4, generate_uuid_v1, encode_jwt, decode_jwt
 from middleware import LoggingMiddleware
 from services.logger import logger
-from datetime import datetime, timezone, timedelta
-
-# Define WIB timezone (UTC+7)
-WIB = timezone(timedelta(hours=7))
-from middleware.auth_middelware import verify_signature
+from datetime import datetime
+from middleware.auth_middleware import verify_signature
 
 
 app = FastAPI(title="Encrypt/Decrypt API")
@@ -99,7 +96,7 @@ def health_check():
     return HealthResponse(
         responseCode=200,
         status="SUCCESS",
-        timestamp=datetime.now(WIB).isoformat()
+        timestamp=datetime.now().isoformat()
     )
 
 
@@ -115,14 +112,13 @@ def encrypt(request: EncryptRequest):
             encrypted_text=result,
             message="Text encrypted successfully"
         )
-    except Exception as e:
+    except Exception:
         return JSONResponse(
             status_code=500,
             content={
                 "responseCode": 500,
                 "status": "INTERNAL_ERROR",
-                "message": "Failed to encrypt text",
-                "detail": str(e)
+                "message": "Failed to encrypt text"
             }
         )
 

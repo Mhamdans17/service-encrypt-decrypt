@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 import jwt
 
@@ -23,13 +23,11 @@ def encode_jwt(
     """Encode data to JWT token"""
     to_encode = payload.copy()
     
-    # Add expiration time
     if expires_in_minutes:
-        expire = datetime.utcnow() + timedelta(minutes=expires_in_minutes)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=expires_in_minutes)
         to_encode.update({"exp": expire})
     
-    # Add issued at time
-    to_encode.update({"iat": datetime.utcnow()})
+    to_encode.update({"iat": datetime.now(timezone.utc)})
     
     encoded_jwt = jwt.encode(to_encode, secret_key, algorithm=algorithm)
     return encoded_jwt

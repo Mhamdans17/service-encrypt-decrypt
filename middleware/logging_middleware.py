@@ -24,7 +24,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 body_bytes = await request.body()
                 if body_bytes:
                     request_body = json.loads(body_bytes.decode())
-            except:
+            except (json.JSONDecodeError, UnicodeDecodeError):
                 request_body = "<unable to parse>"
         
         # Log incoming request
@@ -51,7 +51,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         response_content = None
         try:
             response_content = json.loads(b"".join(response_body).decode())
-        except:
+        except (json.JSONDecodeError, UnicodeDecodeError):
             response_content = "<unable to parse>"
         
         # Log response

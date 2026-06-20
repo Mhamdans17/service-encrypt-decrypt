@@ -9,13 +9,13 @@ class BaseResponse(BaseModel):
 
 
 class EncryptRequest(BaseModel):
-    text: str = Field(..., min_length=1, description="Text to encrypt")
-    secret_key: str = Field(..., min_length=1, description="Secret key for encryption")
+    text: str = Field(..., min_length=1, max_length=10000, description="Text to encrypt")
+    secret_key: str = Field(..., min_length=1, max_length=256, description="Secret key for encryption")
 
 
 class DecryptRequest(BaseModel):
-    encrypted_text: str = Field(..., min_length=1, description="Encrypted text to decrypt")
-    secret_key: str = Field(..., min_length=1, description="Secret key for decryption")
+    encrypted_text: str = Field(..., min_length=1, max_length=20000, description="Encrypted text to decrypt")
+    secret_key: str = Field(..., min_length=1, max_length=256, description="Secret key for decryption")
 
 
 class EncryptResponse(BaseResponse):
@@ -45,13 +45,13 @@ class UUIDResponse(BaseResponse):
 # JWT Schemas
 class JWTEncodeRequest(BaseModel):
     payload: Dict[str, Any] = Field(..., description="Data payload to encode")
-    secret_key: str = Field(..., min_length=1, description="Secret key for JWT signing")
-    expires_in_minutes: Optional[int] = Field(60, description="Token expiration in minutes")
+    secret_key: str = Field(..., min_length=1, max_length=256, description="Secret key for JWT signing")
+    expires_in_minutes: Optional[int] = Field(60, ge=1, le=525600, description="Token expiration in minutes")
 
 
 class JWTDecodeRequest(BaseModel):
-    token: str = Field(..., min_length=1, description="JWT token to decode")
-    secret_key: str = Field(..., min_length=1, description="Secret key for JWT verification")
+    token: str = Field(..., min_length=1, max_length=2048, description="JWT token to decode")
+    secret_key: str = Field(..., min_length=1, max_length=256, description="Secret key for JWT verification")
 
 
 class JWTEncodeResponse(BaseResponse):

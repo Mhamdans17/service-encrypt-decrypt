@@ -6,8 +6,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-API_SECRET_KEY = os.getenv("API_SECRET_KEY", "default-secret")
-TIME_TOLERANCE = 300  # 5 menit dalam detik
+API_SECRET_KEY = os.getenv("API_SECRET_KEY")
+if not API_SECRET_KEY:
+    raise RuntimeError("API_SECRET_KEY environment variable is required")
+
+TIME_TOLERANCE = 300
 
 def verify_signature(request: Request):
     # Skip untuk health check dan root
